@@ -1,6 +1,9 @@
 (function () {
   "use strict";
   var D = window.INHALT || {};
+  var SONGS = window.SONGS || [];
+  var lokal = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  var API = lokal ? "http://127.0.0.1:8787/" : "https://snafgyzhegwkxmunmxje.supabase.co/functions/v1/kehrwerk-license";
   var $ = function (id) { return document.getElementById(id); };
 
   function el(tag, cls, text) {
@@ -9,24 +12,33 @@
     if (text != null) e.textContent = text;
     return e;
   }
+  function euro(n) { return n.toLocaleString("de-DE", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }) + " €"; }
+  function toast(t) { var x = $("toast"); x.textContent = t; x.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { x.hidden = true; }, 4200); }
 
-  /* ---------- Texte ---------- */
-  var name = D.kuenstlername || "Musik";
+  function call(payload) {
+    return fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok || j.error) { var e = new Error(j.error || "Fehler " + r.status); e.status = r.status; throw e; } return j; }); })
+      .catch(function (e) { if (e.message === "Failed to fetch") e.message = "Keine Verbindung. Bitte versuch es gleich noch einmal."; throw e; });
+  }
+
+  /* ---------- Texte & Links ---------- */
+  var name = D.kuenstlername || "Newcall";
   $("name").textContent = name;
   $("logo").textContent = name;
-  $("footer-name").textContent = name;
   $("untertitel").textContent = D.untertitel || "";
   $("kurztext").textContent = D.kurztext || "";
   $("jahr").textContent = new Date().getFullYear();
-  document.title = name + " – " + (D.untertitel || "Musik");
+  if (D.unreleased) { $("unreleased-bar").href = D.unreleased; $("unreleased-btn").href = D.unreleased; }
+  else { $("unreleased-bar").hidden = true; $("unreleased-btn").hidden = true; }
+  if (D.kommission) { $("kommission-link").href = D.kommission; $("insta-btn").href = D.kommission; }
   if (D.appsLink) { $("apps-link").href = D.appsLink; $("footer-apps").href = D.appsLink; }
+  if (D.startLink) $("footer-start").href = D.startLink;
   if (D.impressumLink) $("impressum").href = D.impressumLink;
 
   /* ---------- Socials ---------- */
   var PLATTFORMEN = {
-    instagram: ["Instagram", "#e1306c"], tiktok: ["TikTok", "#25f4ee"], youtube: ["YouTube", "#ff0033"],
-    spotify: ["Spotify", "#1ed760"], soundcloud: ["SoundCloud", "#ff5500"], applemusic: ["Apple Music", "#fa2d48"],
-    beatstars: ["BeatStars", "#f53b57"], x: ["X", "#ffffff"], discord: ["Discord", "#5865f2"]
+    spotify: ["Spotify", "#1ed760"], applemusic: ["Apple Music", "#fa2d48"], amazonmusic: ["Amazon Music", "#25d1da"],
+    youtube: ["YouTube", "#ff0033"], instagram: ["Instagram", "#e1306c"], tiktok: ["TikTok", "#25f4ee"], soundcloud: ["SoundCloud", "#ff5500"]
   };
   var socials = D.socials || {};
   function chip(url, label, farbe) {
@@ -43,100 +55,66 @@
   });
   if (D.appsLink) $("socials").appendChild(chip(D.appsLink, "Newcall Apps", "#8a5cff"));
 
-  var mail = $("mail-btn");
-  if (D.email) {
-    mail.href = "mailto:" + D.email + "?subject=" + encodeURIComponent("Anfrage über deine Website");
-  } else {
-    var erster = Object.keys(PLATTFORMEN).filter(function (k) { return socials[k]; })[0];
-    if (erster) { mail.href = socials[erster]; mail.target = "_blank"; mail.rel = "noopener"; mail.textContent = "Schreib mir auf " + PLATTFORMEN[erster][0]; }
-    else mail.parentNode.hidden = true;
-  }
-
-  /* ---------- Einbettungen (erst nach Klick, wegen Datenschutz) ---------- */
-  function einbettung(link) {
-    var m;
-    if ((m = link.match(/open\.spotify\.com\/(?:intl-[a-z]+\/)?(track|album|playlist|artist|episode)\/([A-Za-z0-9]+)/)))
-      return { dienst: "Spotify", src: "https://open.spotify.com/embed/" + m[1] + "/" + m[2], hoehe: m[1] === "track" ? 152 : 352 };
-    if (/soundcloud\.com\//.test(link))
-      return { dienst: "SoundCloud", src: "https://w.soundcloud.com/player/?url=" + encodeURIComponent(link) + "&color=%23ff3d6e&visual=false&show_comments=false", hoehe: 166 };
-    if ((m = link.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{6,})/)))
-      return { dienst: "YouTube", src: "https://www.youtube-nocookie.com/embed/" + m[1], hoehe: 0 };
-    if ((m = link.match(/music\.apple\.com\/(.+)/)))
-      return { dienst: "Apple Music", src: "https://embed.music.apple.com/" + m[1], hoehe: 175 };
-    return null;
-  }
-
-  /* ---------- Songs ---------- */
-  var VERLAEUFE = [
-    "linear-gradient(135deg,#ff3d6e,#8a5cff)", "linear-gradient(135deg,#1e3cff,#00d4ff)", "linear-gradient(135deg,#ff8a00,#ff3d6e)",
-    "linear-gradient(135deg,#00c896,#1e3cff)", "linear-gradient(135deg,#8a5cff,#00d4ff)", "linear-gradient(135deg,#222,#666)"
-  ];
-  var audio = $("audio");
-  var aktuell = null;
-  (D.songs || []).forEach(function (s, i) {
+  /* ---------- Songs (aus YouTube, songs.js) ---------- */
+  var audio = $("audio"), aktuell = -1, karten = [];
+  function zeit(t) { t = Math.max(0, Math.floor(t || 0)); return Math.floor(t / 60) + ":" + ("0" + (t % 60)).slice(-2); }
+  SONGS.forEach(function (s, i) {
     var card = el("article", "track reveal");
     var cover = el("div", "cover");
-    cover.style.setProperty("--g", VERLAEUFE[i % VERLAEUFE.length]);
-    if (s.cover) { var img = el("img"); img.src = s.cover; img.alt = s.titel; img.loading = "lazy"; cover.appendChild(img); }
-    else cover.appendChild(el("div", "cover-title", s.titel));
+    var img = el("img"); img.src = s.cover; img.alt = "Cover " + s.titel; img.loading = "lazy";
+    cover.appendChild(img);
+    var btn = el("button", "play", "▶");
+    btn.type = "button";
+    btn.setAttribute("aria-label", s.titel + " abspielen");
+    btn.addEventListener("click", function () { spiele(i); });
+    cover.appendChild(btn);
+    cover.addEventListener("dblclick", function () { spiele(i); });
     card.appendChild(cover);
     card.appendChild(el("h3", null, s.titel));
-    card.appendChild(el("p", "meta", [s.jahr, s.rolle].filter(Boolean).join(" · ")));
-
-    if (s.datei) {
-      var btn = el("button", "play", "▶");
-      btn.setAttribute("aria-label", s.titel + " abspielen");
-      btn.addEventListener("click", function () { spiele(s, card); });
-      cover.appendChild(btn);
-    } else if (s.link) {
-      var e = einbettung(s.link);
-      if (e) {
-        var c = el("button", "consent");
-        c.appendChild(document.createTextNode("▶ Player von " + e.dienst + " laden"));
-        c.appendChild(el("small", null, "Erst beim Klick werden Daten an " + e.dienst + " übertragen."));
-        c.addEventListener("click", function () {
-          var box = el("div", "embed"), f = el("iframe");
-          f.src = e.src; f.loading = "lazy"; f.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
-          f.title = s.titel;
-          if (e.hoehe) f.height = e.hoehe; else f.style.aspectRatio = "16 / 9";
-          box.appendChild(f); c.replaceWith(box);
-        });
-        card.appendChild(c);
-      } else {
-        var a = el("a", "consent", "↗ Anhören"); a.href = s.link; a.target = "_blank"; a.rel = "noopener";
-        card.appendChild(a);
-      }
-    } else {
-      card.appendChild(el("p", "soon", "Bald verfügbar"));
+    var meta = el("p", "meta", [s.feat, s.jahr, s.dauer ? zeit(s.dauer) : ""].filter(Boolean).join(" · "));
+    card.appendChild(meta);
+    if (s.youtube) {
+      var yt = el("a", "yt-link", "Auf YouTube ansehen ↗");
+      yt.href = "https://www.youtube.com/watch?v=" + s.youtube; yt.target = "_blank"; yt.rel = "noopener";
+      card.appendChild(yt);
     }
     $("tracks").appendChild(card);
+    karten.push(card);
   });
+  if (!SONGS.length) $("tracks").appendChild(el("p", "fine", "Bald gibt es hier Songs zum Anhören."));
 
-  /* ---------- Player ---------- */
-  function zeit(t) { t = Math.max(0, Math.floor(t || 0)); return Math.floor(t / 60) + ":" + ("0" + (t % 60)).slice(-2); }
   function knopf() {
     var an = !audio.paused;
     $("p-play").textContent = an ? "❚❚" : "▶";
-    document.querySelectorAll(".track").forEach(function (t) {
-      var p = t.querySelector(".play");
-      var spielt = t === (aktuell && aktuell.card) && an;
-      t.classList.toggle("playing", spielt);
-      if (p) p.textContent = spielt ? "❚❚" : "▶";
+    karten.forEach(function (c, i) {
+      var spielt = i === aktuell && an;
+      c.classList.toggle("playing", spielt);
+      c.querySelector(".play").textContent = spielt ? "❚❚" : "▶";
     });
   }
-  function spiele(s, card) {
-    if (aktuell && aktuell.card === card) { audio.paused ? audio.play() : audio.pause(); return; }
-    aktuell = { s: s, card: card };
+  function spiele(i) {
+    if (i === aktuell) { audio.paused ? audio.play() : audio.pause(); return; }
+    aktuell = (i + SONGS.length) % SONGS.length;
+    var s = SONGS[aktuell];
     audio.src = s.datei;
-    $("p-title").textContent = s.titel + " – " + name;
+    $("p-title").textContent = s.titel + (s.feat ? " (" + s.feat + ")" : "") + " – " + name;
+    $("p-cover").src = s.cover;
     $("player").hidden = false;
     verbindeAnalyse();
     audio.play().catch(function () {});
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: s.titel, artist: name + (s.feat ? " " + s.feat : ""),
+        artwork: [{ src: new URL(s.cover, location.href).href, sizes: "800x800", type: "image/jpeg" }] });
+      navigator.mediaSession.setActionHandler("previoustrack", function () { spiele(aktuell - 1); });
+      navigator.mediaSession.setActionHandler("nexttrack", function () { spiele(aktuell + 1); });
+    }
   }
-  $("p-play").addEventListener("click", function () { if (aktuell) audio.paused ? audio.play() : audio.pause(); });
+  $("p-play").addEventListener("click", function () { if (aktuell >= 0) audio.paused ? audio.play() : audio.pause(); });
+  $("p-prev").addEventListener("click", function () { if (aktuell >= 0) spiele(audio.currentTime > 3 ? aktuell : aktuell - 1); if (audio.currentTime > 3) audio.currentTime = 0; });
+  $("p-next").addEventListener("click", function () { if (aktuell >= 0) spiele(aktuell + 1); });
   audio.addEventListener("play", knopf);
   audio.addEventListener("pause", knopf);
-  audio.addEventListener("ended", knopf);
+  audio.addEventListener("ended", function () { if (aktuell < SONGS.length - 1) spiele(aktuell + 1); else knopf(); });
   audio.addEventListener("timeupdate", function () {
     var d = audio.duration || 0;
     $("p-fill").style.width = d ? (audio.currentTime / d * 100) + "%" : "0";
@@ -147,15 +125,166 @@
     if (audio.duration) audio.currentTime = (ev.clientX - r.left) / r.width * audio.duration;
   });
 
-  /* ---------- Leistungen, Über mich ---------- */
-  (D.leistungen || []).forEach(function (l, i) {
-    var c = el("div", "service reveal");
-    c.appendChild(el("span", "num", ("0" + (i + 1)).slice(-2)));
-    c.appendChild(el("h3", null, l.titel));
-    c.appendChild(el("p", null, l.text));
-    c.appendChild(el("span", "preis", l.preis ? l.preis : "Preis auf Anfrage"));
-    $("services").appendChild(c);
+  /* ---------- Konto (Newcall-Konto, gleiches wie im Launcher) ---------- */
+  var konto = null, token = "";
+  try { token = localStorage.getItem("ncToken") || ""; } catch (e) {}
+  var nachAnmeldung = null; // was nach dem Anmelden passieren soll (z. B. Buchen)
+  function setKonto(k) {
+    konto = k;
+    if (k && k.token) { token = k.token; try { localStorage.setItem("ncToken", token); } catch (e) {} }
+    $("account-btn").textContent = k ? (k.name || "Mein Konto") : "Anmelden";
+    newsAnzeige();
+  }
+  function abmelden() { konto = null; token = ""; try { localStorage.removeItem("ncToken"); } catch (e) {} setKonto(null); }
+  if (token) call({ action: "account_me", token: token }).then(function (k) { setKonto(k); })
+    .catch(function (e) { if (e.status === 401 || e.status === 403) abmelden(); });
+
+  var modus = "login";
+  function zeigeTab(m) {
+    modus = m;
+    document.querySelectorAll("#dlg-login .tab").forEach(function (t) { t.classList.toggle("on", t.dataset.tab === m); });
+    document.querySelectorAll("#dlg-login .reg-only").forEach(function (x) { x.hidden = m !== "register"; });
+    $("login-go").textContent = m === "register" ? "Konto erstellen" : "Anmelden";
+    $("l-pw").autocomplete = m === "register" ? "new-password" : "current-password";
+    $("login-err").textContent = "";
+  }
+  document.querySelectorAll("#dlg-login .tab").forEach(function (t) { t.addEventListener("click", function () { zeigeTab(t.dataset.tab); }); });
+  function oeffneLogin(warum, tab, danach) {
+    nachAnmeldung = danach || null;
+    $("login-why").textContent = warum || "Ein Konto für Musik und Apps. Damit buchst du Leistungen und siehst deine Aufträge.";
+    zeigeTab(tab || "login");
+    $("dlg-login").showModal();
+  }
+  $("login-form").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var mail = $("l-mail").value.trim(), pw = $("l-pw").value;
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(mail)) { $("login-err").textContent = "Bitte eine gültige E-Mail eingeben."; return; }
+    if (pw.length < 8) { $("login-err").textContent = "Das Passwort braucht mindestens 8 Zeichen."; return; }
+    var p = modus === "register"
+      ? { action: "account_register", email: mail, password: pw, name: $("l-name").value.trim(), mnews: $("l-news").checked }
+      : { action: "account_login", email: mail, password: pw };
+    $("login-go").disabled = true; $("login-err").textContent = "";
+    call(p).then(function (k) {
+      setKonto(k);
+      $("dlg-login").close();
+      $("l-pw").value = "";
+      if (k.mnews_mail === "gesendet") toast("Fast geschafft: Bitte bestätige den Newsletter in der E-Mail, die ich dir geschickt habe.");
+      else toast(modus === "register" ? "Willkommen, dein Konto ist erstellt." : "Angemeldet.");
+      var f = nachAnmeldung; nachAnmeldung = null;
+      if (f) f();
+    }).catch(function (e) { $("login-err").textContent = e.message; }).then(function () { $("login-go").disabled = false; });
   });
+  $("account-btn").addEventListener("click", function () { konto ? oeffneKonto() : oeffneLogin(); });
+
+  var STATUS = { neu: ["Eingegangen", "warn"], in_arbeit: ["In Arbeit", "free"], fertig: ["Fertig", "ok"] };
+  function oeffneKonto() {
+    $("acc-name").textContent = konto.name || "Mein Konto";
+    $("acc-mail").textContent = konto.email;
+    $("acc-err").textContent = "";
+    newsAnzeige();
+    $("acc-orders").innerHTML = '<p class="fine">Lädt …</p>';
+    $("dlg-account").showModal();
+    call({ action: "music_orders", token: token }).then(function (j) {
+      var box = $("acc-orders"); box.innerHTML = "";
+      if (!j.orders.length) { box.appendChild(el("p", "fine", "Noch keine Aufträge.")); return; }
+      j.orders.forEach(function (o) {
+        var row = el("div", "order");
+        var l = el("div");
+        l.appendChild(el("b", null, o.service + " – " + o.project));
+        l.appendChild(el("p", "fine", new Date(o.created * 1000).toLocaleDateString("de-DE") + " · " + euro(o.amount) + (o.refunded ? " · erstattet" : "")));
+        var st = STATUS[o.state] || STATUS.neu;
+        row.appendChild(l); row.appendChild(el("span", "tag " + st[1], st[0]));
+        box.appendChild(row);
+      });
+    }).catch(function (e) { $("acc-orders").innerHTML = ""; $("acc-err").textContent = e.message; if (e.status === 401) { abmelden(); $("dlg-account").close(); } });
+  }
+  $("acc-logout").addEventListener("click", function () { abmelden(); $("dlg-account").close(); toast("Abgemeldet."); });
+
+  /* ---------- Newsletter (Musik-Verteiler, Double-Opt-in) ---------- */
+  function newsAnzeige() {
+    var st = konto ? konto.mnews : "";
+    var text = { an: "Du bekommst E-Mails zu neuer Musik.", wartet: "Bitte bestätige den Link in deiner E-Mail.", aus: "Du bekommst keine E-Mails." }[st] || "";
+    $("acc-news-text").textContent = text;
+    $("acc-news").textContent = st === "an" || st === "wartet" ? "Abbestellen" : "Abonnieren";
+    $("news-btn").textContent = st === "an" ? "Abonniert ✓" : st === "wartet" ? "Bestätigung ausstehend" : "Newsletter abonnieren";
+    $("news-state").textContent = konto ? text : "Mit deinem kostenlosen Newcall-Konto – dauert 20 Sekunden.";
+  }
+  function setzeNews(an) {
+    return call({ action: "account_news", token: token, list: "musik", on: an }).then(function (j) {
+      konto.mnews = j.news; newsAnzeige();
+      if (j.news_mail === "gesendet") toast("Schau in dein Postfach und bestätige den Newsletter.");
+      else if (j.news_mail === "spaeter") toast("Die Bestätigungs-Mail ist schon unterwegs – schau auch im Spam-Ordner.");
+      else if (j.news_mail === "nicht_eingerichtet" || j.news_mail === "fehler") toast("Die E-Mail konnte gerade nicht verschickt werden. Bitte versuch es später noch einmal.");
+      else if (!an) toast("Abbestellt.");
+    });
+  }
+  $("news-btn").addEventListener("click", function () {
+    if (!konto) {
+      oeffneLogin("Erstelle ein kostenloses Konto und setz den Haken beim Newsletter – oder melde dich an.", "register", function () {
+        if (konto.mnews === "aus") setzeNews(true).catch(function (e) { toast(e.message); });
+      });
+      return;
+    }
+    if (konto.mnews === "an") { oeffneKonto(); return; }
+    setzeNews(true).catch(function (e) { toast(e.message); });
+  });
+  $("acc-news").addEventListener("click", function () {
+    var an = !(konto.mnews === "an" || konto.mnews === "wartet");
+    $("acc-news").disabled = true;
+    setzeNews(an).catch(function (e) { $("acc-err").textContent = e.message; }).then(function () { $("acc-news").disabled = false; });
+  });
+
+  /* ---------- Leistungen (Preise aus dem Admin) & Buchen ---------- */
+  var gewaehlt = null;
+  function zeigeLeistungen(list, annahme) {
+    var box = $("services"); box.innerHTML = "";
+    list.forEach(function (l, i) {
+      var c = el("div", "service reveal show");
+      c.appendChild(el("span", "num", ("0" + (i + 1)).slice(-2)));
+      c.appendChild(el("h3", null, l.title));
+      c.appendChild(el("p", null, l.text));
+      var unten = el("div", "service-foot");
+      unten.appendChild(el("span", "preis", l.price ? euro(l.price) : "Preis auf Anfrage"));
+      var b;
+      if (l.price && annahme && l.id) {
+        b = el("button", "btn btn-primary btn-s", "Buchen");
+        b.type = "button";
+        b.addEventListener("click", function () { buchen(l); });
+      } else {
+        b = el("a", "btn btn-ghost btn-s", "Anfragen");
+        b.href = D.kommission || "#kontakt"; b.target = "_blank"; b.rel = "noopener";
+      }
+      unten.appendChild(b);
+      c.appendChild(unten);
+      box.appendChild(c);
+    });
+    if (!annahme) $("leistungen-hinweis").textContent = "Gerade nehme ich keine neuen Buchungen an. Schreib mir gern auf Instagram, dann melde ich mich, sobald wieder Platz ist.";
+  }
+  zeigeLeistungen((D.leistungen || []).map(function (l) { return { title: l.titel, text: l.text, price: 0 }; }), true);
+  call({ action: "music_info" }).then(function (j) { if (j.services && j.services.length) zeigeLeistungen(j.services, j.accepting); }).catch(function () {});
+
+  function buchen(l) {
+    gewaehlt = l;
+    if (!konto) { oeffneLogin("Zum Buchen brauchst du ein kostenloses Newcall-Konto. So siehst du später auch, wie weit dein Auftrag ist.", "register", function () { buchen(l); }); return; }
+    $("book-title").textContent = l.title;
+    $("book-price").textContent = euro(l.price) + " einmalig";
+    $("book-err").textContent = "";
+    $("dlg-book").showModal();
+  }
+  $("book-form").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var project = $("b-project").value.trim();
+    if (!project) { $("book-err").textContent = "Bitte gib deinem Song oder Projekt einen Namen."; return; }
+    $("book-go").disabled = true; $("book-err").textContent = "";
+    call({ action: "music_checkout", token: token, service: gewaehlt.id, project: project, note: $("b-note").value.trim() })
+      .then(function (j) { location.href = j.url; })
+      .catch(function (e) {
+        $("book-err").textContent = e.message; $("book-go").disabled = false;
+        if (e.status === 401) { abmelden(); $("dlg-book").close(); oeffneLogin("Bitte melde dich neu an.", "login", function () { buchen(gewaehlt); }); }
+      });
+  });
+
+  /* ---------- Über mich ---------- */
   (D.ueberMich || []).forEach(function (t) { $("ueber-text").appendChild(el("p", null, t)); });
   (D.fakten || []).forEach(function (f) {
     var c = el("div", "fact reveal");
@@ -167,7 +296,7 @@
   if ("IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("show"); io.unobserve(e.target); } });
-    }, { threshold: 0.12 });
+    }, { threshold: 0.08 });
     document.querySelectorAll(".reveal").forEach(function (r) { io.observe(r); });
   } else document.querySelectorAll(".reveal").forEach(function (r) { r.classList.add("show"); });
   function navCheck() { $("nav").classList.toggle("solid", window.scrollY > 30); }

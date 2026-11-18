@@ -1,48 +1,38 @@
 /*
   ====================================================================
-  HIER ÄNDERST DU ALLE INHALTE DER WEBSITE.
-  Nur Text zwischen den Anführungszeichen ändern. Leere Links ("")
-  werden auf der Seite einfach nicht angezeigt.
+  HIER ÄNDERST DU DIE TEXTE UND LINKS DER WEBSITE.
+  Nur Text zwischen den Anführungszeichen ändern. Leere Links ("") werden nicht angezeigt.
+  Die Songs kommen automatisch aus YouTube (songs_aktualisieren.bat → songs.js).
+  Leistungen und Preise stellst du im Admin ein (newxcall.github.io/admin.html → „Musik“).
   ====================================================================
 */
 window.INHALT = {
-  kuenstlername: "Newxcall",
+  kuenstlername: "Newcall",
   untertitel: "Producer · Mixing · Mastering · Vocals",
   kurztext: "Seit 7 Jahren baue ich Songs von der ersten Idee bis zum fertigen Master – Beat, Gesang, Mix und Master aus einer Hand.",
 
-  // Kontakt für Anfragen (E-Mail-Adresse). Leer lassen = Knopf führt zu den Socials.
-  email: "",
+  // Ganz oben auf der Seite: unveröffentlichte Songs
+  unreleased: "https://www.youtube.com/@newcall3843",
 
-  // Deine Profile. Einfach den vollständigen Link eintragen.
+  // Aufträge & Kommissionen laufen über Instagram
+  kommission: "https://www.instagram.com/New._.call",
+
   socials: {
-    instagram: "",
+    youtube: "https://www.youtube.com/@newcall3843",
+    instagram: "https://www.instagram.com/New._.call",
+    spotify: "https://open.spotify.com/intl-de/artist/2d4HQ05QBgt1most7wdx7U",
+    applemusic: "https://music.apple.com/de/artist/newcall/1567614364",
+    amazonmusic: "https://amazon.de/music/player/artists/B09541DB8X/newcall",
     tiktok: "",
-    youtube: "",
-    spotify: "",
-    soundcloud: "",
-    applemusic: "",
-    beatstars: "",
-    x: "",
-    discord: ""
+    soundcloud: ""
   },
 
-  // Deine Songs. Pro Song ein Block { ... }.
-  //  datei:  eigene MP3 im Ordner "musik" (z. B. "musik/song.mp3") – spielt direkt auf der Seite
-  //  link:   Link zu Spotify, SoundCloud oder YouTube – wird als Player eingebettet
-  //  cover:  Bild im Ordner "bilder" (optional), sonst ein Farbverlauf
-  //  rolle:  was du am Song gemacht hast
-  songs: [
-    { titel: "Erster Song", jahr: "2026", rolle: "Produktion · Gesang · Mix · Master", datei: "", link: "", cover: "" },
-    { titel: "Zweiter Song", jahr: "2025", rolle: "Produktion · Mix", datei: "", link: "", cover: "" },
-    { titel: "Dritter Song", jahr: "2025", rolle: "Mixing · Mastering", datei: "", link: "", cover: "" }
-  ],
-
-  // Leistungen, die du anbietest. Preis leer lassen = "Auf Anfrage".
+  // Nur falls der Lizenz-Dienst nicht erreichbar ist (sonst kommen Leistungen + Preise aus dem Admin)
   leistungen: [
-    { titel: "Produktion", text: "Beats und komplette Instrumentals – vom Sounddesign bis zum Arrangement.", preis: "" },
-    { titel: "Mixing", text: "Klarer, druckvoller Mix, in dem jede Spur ihren Platz hat. Vocals stehen vorne.", preis: "" },
-    { titel: "Mastering", text: "Laut, sauber und bereit für Spotify, Apple Music und Co.", preis: "" },
-    { titel: "Gesang & Vocals", text: "Eigener Gesang, Hooks, Backings und Vocal-Editing für deine Songs.", preis: "" }
+    { titel: "Produktion", text: "Beat oder komplettes Instrumental – vom Sounddesign bis zum fertigen Arrangement." },
+    { titel: "Mixing", text: "Klarer, druckvoller Mix, in dem jede Spur ihren Platz hat. Vocals stehen vorne." },
+    { titel: "Mastering", text: "Laut, sauber und bereit für Spotify, Apple Music und Co." },
+    { titel: "Gesang & Vocals", text: "Eigener Gesang, Hooks, Backings und Vocal-Editing für deinen Song." }
   ],
 
   ueberMich: [
@@ -50,14 +40,13 @@ window.INHALT = {
     "Weil ich alle Schritte selbst beherrsche, klingt ein Song bei mir von Anfang an wie aus einem Guss. Du bekommst ehrliches Feedback, schnelle Antworten und so viele Korrekturen, bis es passt."
   ],
 
-  // Zahlen im "Über mich"-Bereich
   fakten: [
     { zahl: "7+", text: "Jahre Erfahrung" },
     { zahl: "4", text: "Bereiche aus einer Hand" },
     { zahl: "100 %", text: "Leidenschaft" }
   ],
 
-  // Verweis auf deine Apps-Website
-  appsLink: "https://newxcall.github.io/",
+  appsLink: "https://newxcall.github.io/#apps",
+  startLink: "https://newxcall.github.io/",
   impressumLink: "https://newxcall.github.io/impressum.html"
 };

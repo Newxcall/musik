@@ -3,22 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Musik – Producer, Mixing, Mastering, Vocals</title>
-  <meta name="description" content="Producer, Mixing- und Mastering-Engineer und Sänger. Hör rein und frag deinen Song an.">
-  <meta property="og:title" content="Musik – Producer, Mixing, Mastering, Vocals">
-  <meta property="og:description" content="Beat, Gesang, Mix und Master aus einer Hand.">
+  <title>Newcall – Musik, Producing, Mixing, Mastering</title>
+  <meta name="description" content="Newcall – Songs hören, unveröffentlichte Tracks auf YouTube, Producing, Mixing, Mastering und Vocals buchen.">
+  <meta property="og:title" content="Newcall – Musik">
+  <meta property="og:description" content="Songs hören und Producing, Mixing, Mastering oder Vocals buchen.">
   <meta name="theme-color" content="#08080b">
   <link rel="icon" href="bilder/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <a class="topbar" id="unreleased-bar" href="#" target="_blank" rel="noopener">
+    <span class="live-dot"></span> Unreleased Songs jetzt auf YouTube reinhören <span aria-hidden="true">→</span>
+  </a>
   <header class="nav" id="nav">
-    <a class="logo" href="#top" id="logo">Musik</a>
+    <a class="logo" href="#top" id="logo">Newcall</a>
     <nav>
-      <a href="#musik">Musik</a>
+      <a href="#songs">Songs</a>
       <a href="#leistungen">Leistungen</a>
-      <a href="#ueber">Über mich</a>
-      <a href="#kontakt" class="nav-cta">Anfragen</a>
+      <a href="#newsletter">Newsletter</a>
+      <button class="nav-cta" id="account-btn" type="button">Anmelden</button>
     </nav>
   </header>
 
@@ -30,17 +33,17 @@
         <h1 id="name"></h1>
         <p class="lead" id="kurztext"></p>
         <div class="hero-buttons">
-          <a class="btn btn-primary" href="#musik">▶ Reinhören</a>
-          <a class="btn btn-ghost" href="#kontakt">Song anfragen</a>
+          <a class="btn btn-primary" id="unreleased-btn" href="#" target="_blank" rel="noopener">▶ Unreleased Songs auf YouTube</a>
+          <a class="btn btn-ghost" href="#songs">Songs hören</a>
         </div>
         <div class="social-row" id="hero-socials"></div>
       </div>
     </section>
 
-    <section id="musik" class="section">
+    <section id="songs" class="section">
       <div class="section-head">
-        <p class="eyebrow">Diskografie</p>
-        <h2>Musik</h2>
+        <p class="eyebrow">Hier direkt anhören</p>
+        <h2>Songs</h2>
       </div>
       <div class="tracks" id="tracks"></div>
     </section>
@@ -49,6 +52,8 @@
       <div class="section-head">
         <p class="eyebrow">Was ich für dich mache</p>
         <h2>Leistungen</h2>
+        <p class="lead" id="leistungen-hinweis">Buchen und bezahlen geht direkt hier – du brauchst nur ein kostenloses Newcall-Konto.
+          Individuelle Wünsche und Kommissionen? <a id="kommission-link" href="#" target="_blank" rel="noopener">Schreib mir auf Instagram</a>.</p>
       </div>
       <div class="services" id="services"></div>
     </section>
@@ -62,18 +67,32 @@
       <div class="facts" id="facts"></div>
     </section>
 
+    <section id="newsletter" class="section">
+      <div class="news-card">
+        <div>
+          <p class="eyebrow">Newsletter</p>
+          <h2>Neue Musik zuerst hören.</h2>
+          <p class="lead">Bekomm eine E-Mail, wenn ein neuer Song oder ein unveröffentlichter Track rauskommt. Kein Spam, abbestellen mit einem Klick.</p>
+        </div>
+        <div class="news-action">
+          <button class="btn btn-primary" id="news-btn" type="button">Newsletter abonnieren</button>
+          <p class="fine" id="news-state"></p>
+        </div>
+      </div>
+    </section>
+
     <section id="kontakt" class="section contact">
-      <p class="eyebrow">Kontakt</p>
+      <p class="eyebrow">Kontakt & Kommissionen</p>
       <h2>Lass uns deinen Song machen.</h2>
-      <p class="lead">Schreib mir, was du vorhast – Beat, Mix, Master oder alles zusammen.</p>
+      <p class="lead">Für Kommissionen und Anfragen schreib mir am besten auf Instagram.</p>
       <div class="hero-buttons center">
-        <a class="btn btn-primary" id="mail-btn" href="#socials">Anfrage senden</a>
+        <a class="btn btn-primary" id="insta-btn" href="#" target="_blank" rel="noopener">Auf Instagram schreiben</a>
       </div>
       <div id="socials" class="social-grid"></div>
     </section>
 
     <section class="section apps">
-      <a class="apps-card" id="apps-link" href="https://newxcall.github.io/">
+      <a class="apps-card" id="apps-link" href="https://newxcall.github.io/#apps">
         <div>
           <p class="eyebrow">Auch von mir</p>
           <h3>Newcall Apps</h3>
@@ -85,16 +104,21 @@
   </main>
 
   <footer class="footer">
-    <span>© <span id="jahr"></span> <span id="footer-name"></span></span>
+    <span>© <span id="jahr"></span> Newcall</span>
     <span class="footer-links">
-      <a id="footer-apps" href="https://newxcall.github.io/">Newcall Apps</a>
+      <a id="footer-start" href="https://newxcall.github.io/">Startseite</a>
+      <a id="footer-apps" href="https://newxcall.github.io/#apps">Newcall Apps</a>
+      <a href="bedingungen.html">Auftragsbedingungen</a>
       <a id="impressum" href="https://newxcall.github.io/impressum.html">Impressum</a>
       <a href="datenschutz.html">Datenschutz</a>
     </span>
   </footer>
 
   <div class="player" id="player" hidden>
+    <img class="p-cover" id="p-cover" alt="">
+    <button class="p-btn p-small" id="p-prev" aria-label="Vorheriger Song">⏮</button>
     <button class="p-btn" id="p-play" aria-label="Abspielen">▶</button>
+    <button class="p-btn p-small" id="p-next" aria-label="Nächster Song">⏭</button>
     <div class="p-info">
       <strong id="p-title"></strong>
       <div class="p-bar" id="p-bar"><div id="p-fill"></div></div>
@@ -103,7 +127,60 @@
   </div>
   <audio id="audio" preload="none"></audio>
 
+  <!-- Dialog: Anmelden / Konto erstellen -->
+  <dialog id="dlg-login" class="dlg">
+    <form method="dialog" class="dlg-close"><button aria-label="Schließen">✕</button></form>
+    <h3 id="login-title">Mit Newcall-Konto anmelden</h3>
+    <p class="fine" id="login-why">Ein Konto für Musik und Apps. Damit buchst du Leistungen und siehst deine Aufträge.</p>
+    <div class="tabs"><button type="button" class="tab on" data-tab="login">Anmelden</button><button type="button" class="tab" data-tab="register">Konto erstellen</button></div>
+    <form id="login-form" novalidate>
+      <label class="reg-only">Name (optional)<input id="l-name" autocomplete="name" maxlength="80"></label>
+      <label>E-Mail<input id="l-mail" type="email" autocomplete="email" required></label>
+      <label>Passwort<input id="l-pw" type="password" autocomplete="current-password" required minlength="8"></label>
+      <label class="check reg-only"><input type="checkbox" id="l-news"> <span>Ja, ich möchte Neuigkeiten zu neuer Musik von Newcall (Releases, unveröffentlichte Songs, Angebote) per E-Mail bekommen. Abbestellen geht jederzeit.</span></label>
+      <p class="err" id="login-err" role="alert"></p>
+      <button class="btn btn-primary wide" id="login-go" type="submit">Anmelden</button>
+      <p class="fine reg-only">Mit dem Erstellen stimmst du der <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> zu. Passwort vergessen? Schreib mir auf Instagram.</p>
+    </form>
+  </dialog>
+
+  <!-- Dialog: Leistung buchen -->
+  <dialog id="dlg-book" class="dlg">
+    <form method="dialog" class="dlg-close"><button aria-label="Schließen">✕</button></form>
+    <p class="eyebrow">Buchen</p>
+    <h3 id="book-title"></h3>
+    <p class="book-price" id="book-price"></p>
+    <form id="book-form" novalidate>
+      <label>Song / Projekt<input id="b-project" maxlength="100" placeholder="z. B. Mein neuer Song" required></label>
+      <label>Was brauchst du? (Links zu Spuren, Referenzen, Wünsche)<textarea id="b-note" maxlength="450" rows="4" placeholder="z. B. 24 Spuren, Referenz: … Dateien schicke ich per WeTransfer-Link."></textarea></label>
+      <p class="fine">Nach dem Bezahlen melde ich mich bei dir per E-Mail oder Instagram und wir klären die Details.
+        Es gelten die <a href="bedingungen.html" target="_blank">Auftragsbedingungen</a>.</p>
+      <p class="err" id="book-err" role="alert"></p>
+      <button class="btn btn-primary wide" id="book-go" type="submit">Weiter zur Bezahlung</button>
+      <p class="fine center">Sichere Bezahlung über Stripe (Karte, PayPal, Klarna u. a.).</p>
+    </form>
+  </dialog>
+
+  <!-- Dialog: Mein Konto -->
+  <dialog id="dlg-account" class="dlg">
+    <form method="dialog" class="dlg-close"><button aria-label="Schließen">✕</button></form>
+    <p class="eyebrow">Newcall-Konto</p>
+    <h3 id="acc-name"></h3>
+    <p class="fine" id="acc-mail"></p>
+    <div class="acc-row">
+      <div><b>Musik-Newsletter</b><p class="fine" id="acc-news-text"></p></div>
+      <button class="btn btn-ghost btn-s" id="acc-news" type="button"></button>
+    </div>
+    <h4>Meine Aufträge</h4>
+    <div id="acc-orders" class="orders"><p class="fine">Lädt …</p></div>
+    <p class="err" id="acc-err" role="alert"></p>
+    <button class="btn btn-ghost wide" id="acc-logout" type="button">Abmelden</button>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
   <script src="inhalt.js"></script>
+  <script src="songs.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

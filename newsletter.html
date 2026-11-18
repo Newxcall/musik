@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>Newsletter – Newcall</title>
+  <link rel="icon" href="bilder/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="plain">
+  <main class="card-page">
+    <div class="big-icon" id="icon">✉</div>
+    <h1 id="title">Einen Moment …</h1>
+    <p id="text">Ich prüfe deinen Link.</p>
+    <div class="hero-buttons center"><a class="btn btn-primary" href="./">Zur Musik</a></div>
+    <p class="fine">Den Newsletter kannst du auch auf der Musikseite unter „Mein Konto“ an- und abschalten.</p>
+  </main>
+<script>
+(function () {
+  var lokal = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  var API = lokal ? 'http://127.0.0.1:8787/' : 'https://snafgyzhegwkxmunmxje.supabase.co/functions/v1/kehrwerk-license';
+  var q = new URLSearchParams(location.search), a = q.get('a');
+  var $ = function (x) { return document.getElementById(x); };
+  function show(kind, title, text) { $('icon').className = 'big-icon ' + kind; $('icon').textContent = kind === 'ok' ? '✓' : kind === 'bad' ? '!' : '✉'; $('title').textContent = title; $('text').textContent = text; }
+  function call(action) {
+    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: action, id: q.get('id') || '', t: q.get('t') || '', l: 'musik' }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok || j.error) throw new Error(j.error || 'Fehler ' + r.status); return j; }); });
+  }
+  function fail(e) { show('bad', 'Das hat nicht geklappt', e.message === 'Failed to fetch' ? 'Keine Verbindung. Bitte versuch es gleich noch einmal.' : e.message); }
+  if (a === 'confirm') call('news_confirm').then(function (j) { show('ok', 'Danke, du bist dabei!', 'Neue Songs und unveröffentlichte Tracks bekommst du ab jetzt an ' + j.email + '. Abbestellen geht mit einem Klick unten in jeder E-Mail.'); }).catch(fail);
+  else if (a === 'off') call('news_off').then(function (j) { show('', 'Du bist abgemeldet', 'An ' + j.email + ' schicke ich keine Musik-Neuigkeiten mehr.'); }).catch(fail);
+  else show('bad', 'Der Link ist unvollständig', 'Bitte öffne den Link direkt aus der E-Mail.');
+})();
+</script>
+</body>
+</html>

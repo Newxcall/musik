@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Danke – Newcall</title>
+  <link rel="icon" href="bilder/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="plain">
+  <main class="card-page">
+    <div class="big-icon" id="icon">…</div>
+    <h1 id="title">Einen Moment …</h1>
+    <p id="text">Ich prüfe deine Buchung.</p>
+    <div class="summary" id="summary" hidden></div>
+    <div class="hero-buttons center">
+      <a class="btn btn-primary" href="./">Zurück zur Musik</a>
+      <a class="btn btn-ghost" id="insta" href="https://www.instagram.com/New._.call" target="_blank" rel="noopener">Instagram</a>
+    </div>
+  </main>
+<script>
+(function () {
+  var lokal = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  var API = lokal ? 'http://127.0.0.1:8787/' : 'https://snafgyzhegwkxmunmxje.supabase.co/functions/v1/kehrwerk-license';
+  var id = new URLSearchParams(location.search).get('session_id') || '';
+  var $ = function (x) { return document.getElementById(x); };
+  function show(kind, title, text) { $('icon').className = 'big-icon ' + kind; $('icon').textContent = kind === 'ok' ? '✓' : '!'; $('title').textContent = title; $('text').textContent = text; }
+  var versuche = 0;
+  function laden() {
+    fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'music_claim', session_id: id }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok || j.error) { var e = new Error(j.error || 'Fehler'); e.status = r.status; throw e; } return j; }); })
+      .then(function (j) {
+        var o = j.order;
+        show('ok', 'Danke für deine Buchung!', 'Die Zahlung ist angekommen. Ich melde mich in den nächsten Tagen bei dir (' + o.email + '), um die Details zu klären.');
+        var s = $('summary'); s.hidden = false;
+        [['Leistung', o.service], ['Projekt', o.project], ['Betrag', o.amount.toLocaleString('de-DE', { minimumFractionDigits: 2 }) + ' €']].forEach(function (r) {
+          var row = document.createElement('div'); var a = document.createElement('span'); var b = document.createElement('b');
+          a.textContent = r[0]; b.textContent = r[1]; row.appendChild(a); row.appendChild(b); s.appendChild(row);
+        });
+        var hint = document.createElement('p'); hint.className = 'fine';
+        hint.textContent = 'Den Stand deines Auftrags siehst du jederzeit auf der Musikseite unter „Mein Konto“. Eine Quittung schickt dir Stripe per E-Mail.';
+        s.appendChild(hint);
+      })
+      .catch(function (e) {
+        if (e.status === 409 && versuche++ < 5) { setTimeout(laden, 2500); return; }
+        show('bad', 'Das hat nicht geklappt', e.message === 'Failed to fetch' ? 'Keine Verbindung. Lade die Seite gleich neu – deine Zahlung geht nicht verloren.' : e.message + ' Wenn du bezahlt hast, schreib mir bitte auf Instagram.');
+      });
+  }
+  if (/^cs_/.test(id)) laden(); else show('bad', 'Keine Buchung gefunden', 'Diese Seite öffnet sich nach dem Bezahlen automatisch.');
+})();
+</script>
+</body>
+</html>
