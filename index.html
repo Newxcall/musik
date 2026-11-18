@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
+  <script src="/site-edit.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Newcall – Musik, Producing, Mixing, Mastering</title>
   <meta name="description" content="Newcall – Songs hören, unveröffentlichte Tracks auf YouTube, Producing, Mixing, Mastering und Vocals buchen.">
@@ -21,7 +22,7 @@
       <a href="#leistungen">Leistungen</a>
       <a href="#songs">Songs</a>
       <a href="#newsletter">Newsletter</a>
-      <button class="nav-cta" id="account-btn" type="button">Anmelden</button>
+      <button class="nav-cta" id="account-btn" type="button" data-dyn>Anmelden</button>
     </nav>
   </header>
 
@@ -47,7 +48,7 @@
         <p class="lead" id="leistungen-hinweis">Buchen und bezahlen geht direkt hier – du brauchst nur ein kostenloses Newcall-Konto.
           Individuelle Wünsche und Kommissionen? <a id="kommission-link" href="#" target="_blank" rel="noopener">Schreib mir auf Instagram</a>.</p>
       </div>
-      <div class="services" id="services"></div>
+      <div class="services" id="services" data-dyn></div>
     </section>
 
     <section id="ueber" class="section about">
@@ -56,7 +57,7 @@
         <h2>Alles aus einer Hand.</h2>
         <div id="ueber-text"></div>
       </div>
-      <div class="facts" id="facts"></div>
+      <div class="facts" id="facts" data-dyn></div>
     </section>
 
     <section id="songs" class="section">
@@ -64,7 +65,7 @@
         <p class="eyebrow">Hier direkt anhören</p>
         <h2>Songs</h2>
       </div>
-      <div class="tracks" id="tracks"></div>
+      <div class="tracks" id="tracks" data-dyn></div>
     </section>
 
     <section id="newsletter" class="section">
@@ -88,7 +89,7 @@
       <div class="hero-buttons center">
         <a class="btn btn-primary" id="insta-btn" href="#" target="_blank" rel="noopener">Auf Instagram schreiben</a>
       </div>
-      <div id="socials" class="social-grid"></div>
+      <div id="socials" class="social-grid" data-dyn></div>
     </section>
 
     <section class="section apps">
@@ -114,7 +115,7 @@
     </span>
   </footer>
 
-  <div class="player" id="player" hidden>
+  <div class="player" id="player" data-dyn hidden>
     <img class="p-cover" id="p-cover" alt="">
     <button class="p-btn p-small" id="p-prev" aria-label="Vorheriger Song">⏮</button>
     <button class="p-btn" id="p-play" aria-label="Abspielen">▶</button>
@@ -128,7 +129,7 @@
   <audio id="audio" preload="none"></audio>
 
   <!-- Dialog: Anmelden / Konto erstellen -->
-  <dialog id="dlg-login" class="dlg">
+  <dialog id="dlg-login" class="dlg" data-dyn>
     <form method="dialog" class="dlg-close"><button aria-label="Schließen">✕</button></form>
     <h3 id="login-title">Mit Newcall-Konto anmelden</h3>
     <p class="fine" id="login-why">Ein Konto für Musik und Apps. Damit buchst du Leistungen und siehst deine Aufträge.</p>
@@ -145,7 +146,7 @@
   </dialog>
 
   <!-- Dialog: Leistung buchen -->
-  <dialog id="dlg-book" class="dlg">
+  <dialog id="dlg-book" class="dlg" data-dyn>
     <form method="dialog" class="dlg-close"><button aria-label="Schließen">✕</button></form>
     <p class="eyebrow">Buchen</p>
     <h3 id="book-title"></h3>
@@ -162,7 +163,7 @@
   </dialog>
 
   <!-- Dialog: Mein Konto -->
-  <dialog id="dlg-account" class="dlg">
+  <dialog id="dlg-account" class="dlg" data-dyn>
     <form method="dialog" class="dlg-close"><button aria-label="Schließen">✕</button></form>
     <p class="eyebrow">Newcall-Konto</p>
     <h3 id="acc-name"></h3>
@@ -177,7 +178,7 @@
     <button class="btn btn-ghost wide" id="acc-logout" type="button">Abmelden</button>
   </dialog>
 
-  <div class="toast" id="toast" role="status" hidden></div>
+  <div class="toast" id="toast" role="status" data-dyn hidden></div>
 
   <script src="inhalt.js"></script>
   <script src="songs.js"></script>
