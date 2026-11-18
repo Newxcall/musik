@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Musik – Producer, Mixing, Mastering, Vocals</title>
+  <meta name="description" content="Producer, Mixing- und Mastering-Engineer und Sänger. Hör rein und frag deinen Song an.">
+  <meta property="og:title" content="Musik – Producer, Mixing, Mastering, Vocals">
+  <meta property="og:description" content="Beat, Gesang, Mix und Master aus einer Hand.">
+  <meta name="theme-color" content="#08080b">
+  <link rel="icon" href="bilder/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav" id="nav">
+    <a class="logo" href="#top" id="logo">Musik</a>
+    <nav>
+      <a href="#musik">Musik</a>
+      <a href="#leistungen">Leistungen</a>
+      <a href="#ueber">Über mich</a>
+      <a href="#kontakt" class="nav-cta">Anfragen</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <canvas id="wave" aria-hidden="true"></canvas>
+      <div class="hero-inner">
+        <p class="eyebrow" id="untertitel"></p>
+        <h1 id="name"></h1>
+        <p class="lead" id="kurztext"></p>
+        <div class="hero-buttons">
+          <a class="btn btn-primary" href="#musik">▶ Reinhören</a>
+          <a class="btn btn-ghost" href="#kontakt">Song anfragen</a>
+        </div>
+        <div class="social-row" id="hero-socials"></div>
+      </div>
+    </section>
+
+    <section id="musik" class="section">
+      <div class="section-head">
+        <p class="eyebrow">Diskografie</p>
+        <h2>Musik</h2>
+      </div>
+      <div class="tracks" id="tracks"></div>
+    </section>
+
+    <section id="leistungen" class="section">
+      <div class="section-head">
+        <p class="eyebrow">Was ich für dich mache</p>
+        <h2>Leistungen</h2>
+      </div>
+      <div class="services" id="services"></div>
+    </section>
+
+    <section id="ueber" class="section about">
+      <div class="about-text">
+        <p class="eyebrow">Über mich</p>
+        <h2>Alles aus einer Hand.</h2>
+        <div id="ueber-text"></div>
+      </div>
+      <div class="facts" id="facts"></div>
+    </section>
+
+    <section id="kontakt" class="section contact">
+      <p class="eyebrow">Kontakt</p>
+      <h2>Lass uns deinen Song machen.</h2>
+      <p class="lead">Schreib mir, was du vorhast – Beat, Mix, Master oder alles zusammen.</p>
+      <div class="hero-buttons center">
+        <a class="btn btn-primary" id="mail-btn" href="#socials">Anfrage senden</a>
+      </div>
+      <div id="socials" class="social-grid"></div>
+    </section>
+
+    <section class="section apps">
+      <a class="apps-card" id="apps-link" href="https://newxcall.github.io/">
+        <div>
+          <p class="eyebrow">Auch von mir</p>
+          <h3>Newcall Apps</h3>
+          <p>Programme für Windows und iPhone – WinClean, Pebble, iDock und mehr.</p>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© <span id="jahr"></span> <span id="footer-name"></span></span>
+    <span class="footer-links">
+      <a id="footer-apps" href="https://newxcall.github.io/">Newcall Apps</a>
+      <a id="impressum" href="https://newxcall.github.io/impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
+    </span>
+  </footer>
+
+  <div class="player" id="player" hidden>
+    <button class="p-btn" id="p-play" aria-label="Abspielen">▶</button>
+    <div class="p-info">
+      <strong id="p-title"></strong>
+      <div class="p-bar" id="p-bar"><div id="p-fill"></div></div>
+    </div>
+    <span class="p-time" id="p-time">0:00</span>
+  </div>
+  <audio id="audio" preload="none"></audio>
+
+  <script src="inhalt.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

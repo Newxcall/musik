@@ -1,0 +1,2 @@
+Hier deine MP3-Dateien ablegen (z. B. song.mp3) und in inhalt.js bei "datei" eintragen: "musik/song.mp3"
+Tipp: 320 kbps MP3, Dateinamen ohne Leerzeichen und Umlaute.
