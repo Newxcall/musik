@@ -125,6 +125,10 @@
       <div class="p-bar" id="p-bar"><div id="p-fill"></div></div>
     </div>
     <span class="p-time" id="p-time">0:00</span>
+    <div class="p-vol">
+      <button class="p-mute" id="p-mute" type="button" aria-label="Stumm schalten"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="p-vol-icon" d="M4 9v6h4l5 4V5L8 9zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg></button>
+      <input type="range" id="p-vol" min="0" max="1" step="0.01" value="0.8" aria-label="Lautstärke">
+    </div>
   </div>
   <audio id="audio" preload="none"></audio>
 

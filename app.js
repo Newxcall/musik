@@ -120,6 +120,36 @@
     $("p-fill").style.width = d ? (audio.currentTime / d * 100) + "%" : "0";
     $("p-time").textContent = zeit(d - audio.currentTime);
   });
+  /* ---------- Lautstärke (Regler + Stumm, gemerkt in diesem Browser) ----------
+     Läuft die Musik über die Wellenform-Analyse (Web Audio), regelt ein Verstärker-Knoten die Lautstärke –
+     das geht auch auf dem iPhone, wo audio.volume nicht verstellbar ist. */
+  var gain = null, lautst = 0.8, stumm = false, vorher = 0.8;
+  try { var gv = parseFloat(localStorage.getItem("ncMusikVol")); if (gv >= 0 && gv <= 1) lautst = gv; } catch (e) {}
+  if (lautst > 0) vorher = lautst;
+  var VOL_AN = "M4 9v6h4l5 4V5L8 9zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z";
+  var VOL_AUS = "M4 9v6h4l5 4V5L8 9zm12.6 3 2.4-2.4-1.4-1.4-2.4 2.4-2.4-2.4-1.4 1.4 2.4 2.4-2.4 2.4 1.4 1.4 2.4-2.4 2.4 2.4 1.4-1.4z";
+  function setzeLautst() {
+    var v = stumm ? 0 : lautst;
+    if (gain) { gain.gain.value = v; audio.volume = 1; } else { try { audio.volume = v; } catch (e) {} }
+    $("p-vol").value = stumm ? 0 : lautst;
+    $("p-vol").style.setProperty("--p", ($("p-vol").value * 100) + "%");
+    var aus = stumm || lautst === 0;
+    $("p-vol-icon").setAttribute("d", aus ? VOL_AUS : VOL_AN);
+    $("p-mute").setAttribute("aria-label", aus ? "Ton an" : "Stumm schalten");
+  }
+  $("p-vol").addEventListener("input", function () {
+    lautst = +this.value; stumm = false;
+    if (lautst > 0) vorher = lautst;
+    try { localStorage.setItem("ncMusikVol", String(lautst)); } catch (e) {}
+    setzeLautst();
+  });
+  $("p-mute").addEventListener("click", function () {
+    if (stumm || lautst === 0) { stumm = false; if (lautst === 0) lautst = vorher; }
+    else stumm = true;
+    setzeLautst();
+  });
+  setzeLautst();
+
   $("p-bar").addEventListener("click", function (ev) {
     var r = this.getBoundingClientRect();
     if (audio.duration) audio.currentTime = (ev.clientX - r.left) / r.width * audio.duration;
@@ -311,7 +341,9 @@
       var ctx = new AC();
       var src = ctx.createMediaElementSource(audio);
       analyser = ctx.createAnalyser(); analyser.fftSize = 256;
-      src.connect(analyser); analyser.connect(ctx.destination);
+      gain = ctx.createGain();
+      src.connect(analyser); analyser.connect(gain); gain.connect(ctx.destination);
+      setzeLautst();
       daten = new Uint8Array(analyser.frequencyBinCount);
       audio.addEventListener("play", function () { ctx.resume(); });
     } catch (e) { analyser = null; }
