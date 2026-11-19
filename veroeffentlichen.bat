@@ -11,7 +11,7 @@ if errorlevel 1 (
 )
 git remote get-url origin >nul 2>&1 || git remote add origin https://github.com/Newxcall/musik.git
 
-rem Versionsnummern an CSS/JS, damit Browser geänderte Dateien sofort neu laden
+rem Versionsnummern an CSS/JS, damit Browser geaenderte Dateien sofort neu laden
 python werkzeugersionen.py
 
 git add -A

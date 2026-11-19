@@ -33,7 +33,7 @@ def main():
             with open(p, "w", encoding="utf-8", newline="") as f:
                 f.write(neu)
             changed += 1
-    print(f"Versionsnummern aktualisiert ({changed} Seite(n) geändert).")
+    print(f"Versionsnummern aktualisiert ({changed} Seite(n) geaendert).")
 
 
 if __name__ == "__main__":
