@@ -42,8 +42,7 @@ window.INHALT = {
 
   fakten: [
     { zahl: "7+", text: "Jahre Erfahrung" },
-    { zahl: "4", text: "Bereiche aus einer Hand" },
-    { zahl: "100 %", text: "Leidenschaft" }
+    { zahl: "4", text: "Bereiche aus einer Hand" }
   ],
 
   appsLink: "https://newxcall.github.io/#apps",

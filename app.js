@@ -58,10 +58,20 @@
   /* ---------- Songs (aus YouTube, songs.js) ---------- */
   var audio = $("audio"), aktuell = -1, karten = [];
   function zeit(t) { t = Math.max(0, Math.floor(t || 0)); return Math.floor(t / 60) + ":" + ("0" + (t % 60)).slice(-2); }
+  // Musikvideos im Breitbild haben oben und unten schwarze Balken im Vorschaubild: erkennen und wegschneiden.
+  function schwarzeBalken(img) {
+    try {
+      var c = document.createElement("canvas"); c.width = 40; c.height = 40;
+      var g = c.getContext("2d"); g.drawImage(img, 0, 0, 40, 40);
+      function dunkel(y) { var d = g.getImageData(0, y, 40, 1).data, s = 0; for (var i = 0; i < d.length; i += 4) s += d[i] + d[i + 1] + d[i + 2]; return s / (40 * 3) < 18; }
+      return dunkel(1) && dunkel(3) && dunkel(36) && dunkel(38) && !dunkel(20);
+    } catch (e) { return false; }
+  }
   SONGS.forEach(function (s, i) {
     var card = el("article", "track reveal");
     var cover = el("div", "cover");
     var img = el("img"); img.src = s.cover; img.alt = "Cover " + s.titel; img.loading = "lazy";
+    img.addEventListener("load", function () { if (schwarzeBalken(img)) img.classList.add("letterbox"); });
     cover.appendChild(img);
     var btn = el("button", "play", "▶");
     btn.type = "button";
@@ -270,7 +280,6 @@
     var box = $("services"); box.innerHTML = "";
     list.forEach(function (l, i) {
       var c = el("div", "service reveal show");
-      c.appendChild(el("span", "num", ("0" + (i + 1)).slice(-2)));
       c.appendChild(el("h3", null, l.title));
       c.appendChild(el("p", null, l.text));
       var unten = el("div", "service-foot");
@@ -361,9 +370,7 @@
     var bw = w / n, live = analyser && !audio.paused;
     if (live) analyser.getByteFrequencyData(daten);
     cx.clearRect(0, 0, w, h);
-    var g = cx.createLinearGradient(0, 0, w, 0);
-    g.addColorStop(0, "#ff3d6e"); g.addColorStop(1, "#8a5cff");
-    cx.fillStyle = g;
+    cx.fillStyle = "#ff4d6d";
     for (var i = 0; i < n; i++) {
       var v;
       if (live) v = daten[Math.floor(Math.pow(i / n, 1.6) * daten.length * 0.8)] / 255;
